@@ -15,13 +15,32 @@ bool Renderer::initialize(SDL_Window* window) {
                                      kTargetWidth, kTargetHeight);
   if (!targetTexture_) return false;
 
+  if (!plasma_.initialize(renderer_, kTargetWidth, kTargetHeight)) return false;
+  if (!fire_.initialize(renderer_, kTargetWidth, kTargetHeight)) return false;
+
+  starfield_.reset();
+  copperBars_.reset();
+  scroller_.reset("WELCOME TO THE AMIGA DEMO V1 -- CODED IN C++ WITH SDL2 -- GREETINGS TO THE DEMOSCENE -- "
+                   "NOW WE ARE GOING TO ROCK YOUR AMIGA -- RESPECT TO ALL THE OLD SCHOOL CODERS -- "
+                   "ENJOY THE SHOW -- ");
   return true;
 }
 
 void Renderer::update(const DemoState& state, double dtSeconds) {
-  sceneBlend_ = state.sceneBlend;
+  plasmaBlend_ = state.plasma;
+  fireBlend_ = state.fire;
+  copperBlend_ = state.copper;
+  starfieldBlend_ = state.starfield;
+  pentagramBlend_ = state.pentagram;
+  scrollerBlend_ = state.scroller;
   flash_ = state.flash;
   rotationSpeed_ = state.rotationSpeed;
+
+  plasma_.update(dtSeconds);
+  fire_.update(dtSeconds);
+  copperBars_.update(dtSeconds);
+  starfield_.update(dtSeconds, rotationSpeed_ * 0.8f);
+  scroller_.update(dtSeconds, rotationSpeed_ * 4.0f);
 
   objectAngle_ += static_cast<float>(dtSeconds) * rotationSpeed_;
   if (objectAngle_ > 6.2831853f) {
@@ -32,35 +51,64 @@ void Renderer::update(const DemoState& state, double dtSeconds) {
 void Renderer::render() {
   SDL_SetRenderTarget(renderer_, targetTexture_);
 
-  const float pulse = 0.5f + 0.5f * std::sin(objectAngle_ * 2.0f);
-  const Uint8 bgR = static_cast<Uint8>(20.0f + 80.0f * sceneBlend_);
-  const Uint8 bgG = static_cast<Uint8>(12.0f + 40.0f * pulse);
-  const Uint8 bgB = static_cast<Uint8>(30.0f + 100.0f * (1.0f - sceneBlend_));
-
-  SDL_SetRenderDrawColor(renderer_, bgR, bgG, bgB, 255);
+  SDL_SetRenderDrawColor(renderer_, 0, 0, 0, 255);
   SDL_RenderClear(renderer_);
 
-  const int cx = kTargetWidth / 2;
-  const int cy = kTargetHeight / 2;
-  const int size = 30 + static_cast<int>(20.0f * sceneBlend_);
-
-  SDL_Point poly[5];
-  for (int i = 0; i < 5; ++i) {
-    const float a = objectAngle_ + static_cast<float>(i) * (6.2831853f / 5.0f);
-    const float r = static_cast<float>(size) * (0.75f + 0.25f * ((i % 2 == 0) ? 1.0f : 0.6f));
-    poly[i].x = cx + static_cast<int>(std::cos(a) * r);
-    poly[i].y = cy + static_cast<int>(std::sin(a) * r);
+  if (plasmaBlend_ > 0.01f) {
+    SDL_SetTextureAlphaMod(plasma_.texture(), static_cast<Uint8>(plasmaBlend_ * 255.0f));
+    plasma_.render(renderer_);
   }
 
-  const Uint8 objR = static_cast<Uint8>(130.0f + 80.0f * pulse);
-  const Uint8 objG = static_cast<Uint8>(110.0f + 70.0f * sceneBlend_);
-  const Uint8 objB = static_cast<Uint8>(90.0f + 50.0f * (1.0f - sceneBlend_));
-  SDL_SetRenderDrawColor(renderer_, objR, objG, objB, 255);
+  if (copperBlend_ > 0.01f) {
+    SDL_SetRenderDrawBlendMode(renderer_, SDL_BLENDMODE_BLEND);
+    const Uint8 ca = static_cast<Uint8>(copperBlend_ * 120.0f);
+    copperBars_.render(renderer_, kTargetWidth, kTargetHeight, ca);
+    SDL_SetRenderDrawBlendMode(renderer_, SDL_BLENDMODE_NONE);
+  }
 
-  for (int i = 0; i < 5; ++i) {
-    const int next = (i + 1) % 5;
-    SDL_RenderDrawLine(renderer_, poly[i].x, poly[i].y, poly[next].x, poly[next].y);
-    SDL_RenderDrawLine(renderer_, cx, cy, poly[i].x, poly[i].y);
+  if (fireBlend_ > 0.01f) {
+    SDL_SetTextureAlphaMod(fire_.texture(), static_cast<Uint8>(fireBlend_ * 255.0f));
+    fire_.render(renderer_);
+  }
+
+  if (starfieldBlend_ > 0.01f) {
+    SDL_SetRenderDrawColor(renderer_, 255, 255, 255,
+                           static_cast<Uint8>(starfieldBlend_ * 255.0f));
+    starfield_.render(renderer_, kTargetWidth, kTargetHeight);
+  }
+
+  if (pentagramBlend_ > 0.01f) {
+    const float pulse = 0.5f + 0.5f * std::sin(objectAngle_ * 2.0f);
+
+    const int cx = kTargetWidth / 2;
+    const int cy = kTargetHeight / 2;
+    const int size = 20 + static_cast<int>(25.0f * pentagramBlend_);
+
+    SDL_Point poly[5];
+    for (int i = 0; i < 5; ++i) {
+      const float a = objectAngle_ + static_cast<float>(i) * (6.2831853f / 5.0f);
+      const float r = static_cast<float>(size) * (0.75f + 0.25f * ((i % 2 == 0) ? 1.0f : 0.6f));
+      poly[i].x = cx + static_cast<int>(std::cos(a) * r);
+      poly[i].y = cy + static_cast<int>(std::sin(a) * r);
+    }
+
+    const Uint8 objR = static_cast<Uint8>(130.0f + 80.0f * pulse);
+    const Uint8 objG = static_cast<Uint8>(110.0f + 70.0f * pentagramBlend_);
+    const Uint8 objB = static_cast<Uint8>(90.0f + 50.0f * (1.0f - pentagramBlend_));
+    const Uint8 objA = static_cast<Uint8>(pentagramBlend_ * 255.0f);
+    SDL_SetRenderDrawColor(renderer_, objR, objG, objB, objA);
+
+    for (int i = 0; i < 5; ++i) {
+      const int next = (i + 1) % 5;
+      SDL_RenderDrawLine(renderer_, poly[i].x, poly[i].y, poly[next].x, poly[next].y);
+      SDL_RenderDrawLine(renderer_, cx, cy, poly[i].x, poly[i].y);
+    }
+  }
+
+  if (scrollerBlend_ > 0.01f) {
+    SDL_SetRenderDrawColor(renderer_, 255, 255, 255,
+                           static_cast<Uint8>(scrollerBlend_ * 255.0f));
+    scroller_.render(renderer_, kTargetWidth, kTargetHeight);
   }
 
   if (flash_ > 0.01f) {
@@ -90,6 +138,9 @@ void Renderer::render() {
 }
 
 void Renderer::shutdown() {
+  plasma_.shutdown();
+  fire_.shutdown();
+
   if (targetTexture_) {
     SDL_DestroyTexture(targetTexture_);
     targetTexture_ = nullptr;

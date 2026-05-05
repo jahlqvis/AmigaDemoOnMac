@@ -50,7 +50,12 @@ add_executable(amiga_demo
   src/main.cpp
   src/app.cpp
   src/audio.cpp
+  src/copper.cpp
+  src/fire.cpp
+  src/plasma.cpp
   src/renderer.cpp
+  src/scroller.cpp
+  src/starfield.cpp
   src/timeline.cpp
 )
 
