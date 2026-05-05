@@ -1,38 +1,43 @@
-# Amiga-Style Demo v1 (Skeleton)
+# Amiga Demo v1
 
-Native macOS C++ skeleton for a retro demo with SDL2 + SDL2_mixer.
+Retro demoscene demo for macOS — single self-contained executable. 320×256 PAL resolution with nearest-neighbor upscaling, music-synced keyframe-driven scenes, and embedded OGG audio.
+
+## Effects
+
+- **Starfield** — 200-star 3D particle system
+- **Copper bars** — per-scanline sine wave background
+- **Plasma** — 6-component rainbow sine plasma
+- **Fire** — procedural flame with custom palette
+- **Pentagram** — rotating 5-pointed star with color pulse
+- **Scroller** — sine wave text with embedded 8×8 bitmap font
+
+## Scene Timeline
+
+| Time | Scene | Active Effects |
+|------|-------|---------------|
+| 0–8s | Intro | Starfield, scroller, pentagram |
+| 8–16s | Copper Dream | Copper fades in, starfield dims |
+| 16–24s | Plasma Waves | Plasma in, copper overlay |
+| 24–34s | Inferno | Fire in, copper out, flash bursts |
+| 34–44s | Grand Finale | All effects layered, max speed |
+| 44–54s | Outro | Fade to starfield |
 
 ## Prerequisites
-
-Install tools and libraries with Homebrew:
 
 ```bash
 brew install cmake sdl2 sdl2_mixer
 ```
 
-## Build
-
-From the project root:
+## Build & Run
 
 ```bash
 cmake -S . -B build
 cmake --build build
-```
-
-## Run
-
-```bash
 ./build/amiga_demo
 ```
 
-Controls:
+## Controls
 
-- `Esc`: quit
+- `Esc` — quit
 
-## Assets
-
-Put your music file at:
-
-`assets/audio/demo.ogg`
-
-If the file is missing, the app still runs but without music.
+The demo is fully self-contained — music is embedded in the executable. No external files needed.
