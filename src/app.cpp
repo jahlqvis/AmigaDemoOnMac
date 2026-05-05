@@ -1,4 +1,5 @@
 #include "app.hpp"
+#include "demo_ogg.h"
 
 #include <SDL.h>
 
@@ -38,8 +39,8 @@ bool App::initialize() {
     return false;
   }
 
-  if (!audio_.loadMusic("assets/audio/demo.ogg")) {
-    std::cerr << "Warning: could not load assets/audio/demo.ogg; running without music\n";
+  if (!audio_.loadMusicFromMemory(assets_audio_demo_ogg, assets_audio_demo_ogg_len)) {
+    std::cerr << "Warning: could not load embedded music; running without music\n";
   } else {
     audio_.playMusic();
   }

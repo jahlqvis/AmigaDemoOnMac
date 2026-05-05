@@ -8,6 +8,7 @@ class Audio {
 public:
   bool initialize();
   bool loadMusic(const std::string& path);
+  bool loadMusicFromMemory(const unsigned char* data, unsigned int size);
   void playMusic();
   double musicTimeSeconds() const;
   void shutdown();

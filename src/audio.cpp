@@ -30,6 +30,19 @@ bool Audio::loadMusic(const std::string& path) {
   return music_ != nullptr;
 }
 
+bool Audio::loadMusicFromMemory(const unsigned char* data, unsigned int size) {
+  if (music_) {
+    Mix_FreeMusic(music_);
+    music_ = nullptr;
+  }
+
+  SDL_RWops* rw = SDL_RWFromConstMem(data, static_cast<int>(size));
+  if (!rw) return false;
+
+  music_ = Mix_LoadMUS_RW(rw, 1);
+  return music_ != nullptr;
+}
+
 void Audio::playMusic() {
   if (!music_) {
     return;

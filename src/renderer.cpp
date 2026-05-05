@@ -40,7 +40,7 @@ void Renderer::update(const DemoState& state, double dtSeconds) {
   fire_.update(dtSeconds);
   copperBars_.update(dtSeconds);
   starfield_.update(dtSeconds, rotationSpeed_ * 0.8f);
-  scroller_.update(dtSeconds, rotationSpeed_ * 4.0f);
+  scroller_.update(dtSeconds, rotationSpeed_ * 50.0f);
 
   objectAngle_ += static_cast<float>(dtSeconds) * rotationSpeed_;
   if (objectAngle_ > 6.2831853f) {
